@@ -2,206 +2,551 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Tableau de bord personnel — acces prive">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Mes Finances — Reprenez le contrôle de votre argent simplement.">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="MySpace">
+    <meta name="apple-mobile-web-app-title" content="Mes Finances">
     <meta name="theme-color" content="#6366f1">
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icons/icon-192.svg">
-    <title>MySpace - Dashboard</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <title>Mes Finances</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
         :root{
             --bg:#f8fafc;--surface:#ffffff;--card:#ffffff;--card-h:#f1f5f9;
-            --accent:#6366f1;--accent-dim:rgba(99,102,241,.08);--accent-glow:rgba(99,102,241,.24);
+            --accent:#6366f1;--accent2:#818cf8;--accent-dim:rgba(99,102,241,.08);--accent-glow:rgba(99,102,241,.22);
+            --green:#10b981;--green-dim:rgba(16,185,129,.1);
             --text:#0f172a;--muted:#64748b;--faint:#cbd5e1;
-            --border:rgba(15,23,42,.08);--border-h:rgba(99,102,241,.45);
-            --shadow-sm:0 1px 3px rgba(15,23,42,.05);
-            --shadow-md:0 8px 24px rgba(15,23,42,.07);
+            --border:rgba(15,23,42,.08);--border-h:rgba(99,102,241,.4);
+            --shadow-sm:0 1px 3px rgba(15,23,42,.06);
+            --shadow-md:0 8px 30px rgba(15,23,42,.08);
+            --shadow-lg:0 20px 60px rgba(15,23,42,.12);
             --r:16px;--rs:10px;--ease:cubic-bezier(.4,0,.2,1)
         }
-        html,body{height:100%;font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
+        html{scroll-behavior:smooth;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+        body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+        input,textarea,select,button{font-family:inherit}
+        a{color:var(--accent);text-decoration:none}
 
-        /* LOCK */
-        #lock{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);z-index:1000;transition:opacity .55s var(--ease),transform .55s var(--ease)}
-        #lock.hidden{opacity:0;transform:scale(1.04);pointer-events:none}
-        .lbg{position:absolute;inset:0;background:radial-gradient(ellipse 90% 55% at 50% -10%,rgba(99,102,241,.12) 0%,transparent 68%),radial-gradient(ellipse 55% 40% at 90% 110%,rgba(99,102,241,.06) 0%,transparent 60%)}
-        .lbg::after{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(15,23,42,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(15,23,42,.025) 1px,transparent 1px);background-size:56px 56px}
-        .lc{position:relative;display:flex;flex-direction:column;align-items:center;gap:36px}
-        .lt{font-size:clamp(64px,11vw,104px);font-weight:300;letter-spacing:-4px;line-height:1;font-variant-numeric:tabular-nums;color:var(--text)}
-        .ld{margin-top:10px;font-size:13px;color:var(--muted);letter-spacing:.06em;text-transform:capitalize}
-        .lsep{width:36px;height:1px;background:var(--border)}
-        .llbl{font-size:11.5px;font-weight:500;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
-        .dots{display:flex;gap:14px}
-        .dot{width:11px;height:11px;border-radius:50%;border:1.5px solid var(--faint);transition:all .15s;background:transparent}
-        .dot.on{background:var(--accent);border-color:var(--accent);box-shadow:0 0 14px var(--accent-glow)}
-        .dot.err{background:#ef4444;border-color:#ef4444;animation:shk .4s var(--ease)}
-        @keyframes shk{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
-        .kp{display:grid;grid-template-columns:repeat(3,70px);gap:11px}
-        .k{height:70px;border-radius:14px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:inherit;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);transition:background .15s,border-color .15s,transform .1s,box-shadow .15s;-webkit-tap-highlight-color:transparent}
-        .k:hover{background:var(--card-h);border-color:var(--border-h);box-shadow:var(--shadow-md)}
-        .k:active{transform:scale(.94)}
-        .k.empty{background:transparent;border:none;box-shadow:none;pointer-events:none}
-        .k.del{font-size:13px;color:var(--muted)}
+        /* ===== LANDING PAGE ===== */
+        .landing{min-height:100vh}
 
-        /* DASHBOARD */
-        #db{position:fixed;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .5s var(--ease)}
-        #db.on{opacity:1;pointer-events:all}
-        .hdr{display:flex;align-items:center;justify-content:space-between;padding:18px 36px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;gap:16px;box-shadow:0 1px 2px rgba(15,23,42,.03)}
-        .logo{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600;white-space:nowrap;flex-shrink:0;color:var(--text)}
-        .ldot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent-glow)}
-        .acts{display:flex;align-items:center;gap:12px;flex-shrink:0}
-        .dtm{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;font-weight:500}
-        .ibtn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);transition:all .18s var(--ease)}
-        .ibtn:hover{border-color:var(--border-h);color:var(--accent);background:var(--card-h)}
-        .main{flex:1;overflow-y:auto;padding:32px 36px;background:var(--bg)}
-        .main::-webkit-scrollbar{width:5px}
-        .main::-webkit-scrollbar-thumb{background:var(--faint);border-radius:3px}
-        .greet{margin-bottom:28px}
-        .greet h1{font-size:26px;font-weight:400;margin-bottom:4px;color:var(--text)}
-        .greet p{font-size:13px;color:var(--muted);text-transform:capitalize}
+        /* Nav */
+        .lnav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(16px);background:rgba(248,250,252,.85);border-bottom:1px solid var(--border);transition:box-shadow .3s}
+        .lnav.scrolled{box-shadow:var(--shadow-sm)}
+        .lnav-inner{max-width:1100px;margin:0 auto;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between}
+        .lnav-logo{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:700;color:var(--text)}
+        .lnav-logo span{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .lnav-dot{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700}
+        .lnav-links{display:flex;align-items:center;gap:8px}
+        .lnav-links a{padding:8px 14px;font-size:13px;font-weight:500;color:var(--muted);border-radius:8px;transition:all .2s}
+        .lnav-links a:hover{color:var(--text);background:var(--accent-dim)}
+        .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 20px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .2s var(--ease);white-space:nowrap}
+        .btn-primary{background:linear-gradient(135deg,var(--accent),#4f46e5);color:#fff;box-shadow:0 4px 14px var(--accent-glow)}
+        .btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px var(--accent-glow)}
+        .btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border)}
+        .btn-ghost:hover{border-color:var(--border-h);background:var(--accent-dim)}
+        .btn-lg{padding:14px 32px;font-size:15px;border-radius:12px}
+        .btn-sm{padding:8px 16px;font-size:13px}
 
-        .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px}
-        .card{aspect-ratio:1;border-radius:var(--r);border:1px solid var(--border);background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;cursor:pointer;position:relative;overflow:hidden;box-shadow:var(--shadow-sm);transition:background .2s,border-color .2s,transform .2s var(--ease),box-shadow .2s;-webkit-tap-highlight-color:transparent}
-        .card::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,var(--accent-dim) 0%,transparent 70%);opacity:0;transition:opacity .25s}
-        .card:hover{border-color:var(--border-h);background:var(--surface);transform:translateY(-3px);box-shadow:var(--shadow-md)}
-        .card:hover::after{opacity:1}
-        .aico{display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:12px;position:relative;z-index:1;transition:transform .2s,background .2s}
-        .aico svg{width:26px;height:26px;stroke-width:1.8}
-        .card:hover .aico{transform:scale(1.08)}
-        .anm{font-size:13px;font-weight:500;text-align:center;position:relative;z-index:1;color:var(--text)}
-        .adesc{font-size:11px;color:var(--muted);text-align:center;padding:0 8px}
+        /* Hero */
+        .hero{padding:140px 24px 80px;text-align:center;position:relative;overflow:hidden}
+        .hero::before{content:'';position:absolute;top:-120px;left:50%;transform:translateX(-50%);width:800px;height:600px;background:radial-gradient(ellipse,rgba(99,102,241,.1) 0%,transparent 70%);pointer-events:none}
+        .hero-inner{max-width:720px;margin:0 auto;position:relative}
+        .hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;background:var(--green-dim);color:var(--green);border-radius:50px;font-size:12px;font-weight:600;margin-bottom:24px;letter-spacing:.02em}
+        .hero h1{font-size:clamp(32px,6vw,56px);font-weight:800;line-height:1.1;letter-spacing:-1.5px;margin-bottom:20px;color:var(--text)}
+        .hero h1 em{font-style:normal;background:linear-gradient(135deg,var(--accent),#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .hero p{font-size:clamp(16px,2.2vw,19px);line-height:1.6;color:var(--muted);max-width:560px;margin:0 auto 36px}
+        .hero-ctas{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 
-        /* OVERLAY */
+        /* Pain points */
+        .pain{padding:80px 24px;background:var(--surface)}
+        .pain-inner{max-width:1000px;margin:0 auto}
+        .pain-head{text-align:center;margin-bottom:48px}
+        .pain-head h2{font-size:clamp(22px,3.5vw,32px);font-weight:700;margin-bottom:12px}
+        .pain-head p{color:var(--muted);font-size:15px}
+        .pain-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+        .pain-card{padding:28px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg);transition:all .25s var(--ease)}
+        .pain-card:hover{border-color:var(--border-h);transform:translateY(-3px);box-shadow:var(--shadow-md)}
+        .pain-icon{font-size:32px;margin-bottom:14px}
+        .pain-card h3{font-size:16px;font-weight:600;margin-bottom:8px}
+        .pain-card p{font-size:14px;color:var(--muted);line-height:1.55}
+
+        /* Features */
+        .features{padding:80px 24px}
+        .features-inner{max-width:1000px;margin:0 auto}
+        .features-head{text-align:center;margin-bottom:48px}
+        .features-head h2{font-size:clamp(22px,3.5vw,32px);font-weight:700;margin-bottom:12px}
+        .features-head p{color:var(--muted);font-size:15px}
+        .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+        .feat{padding:24px;border-radius:var(--r);background:var(--surface);border:1px solid var(--border);text-align:center;transition:all .25s var(--ease)}
+        .feat:hover{border-color:var(--border-h);box-shadow:var(--shadow-sm)}
+        .feat-icon{width:48px;height:48px;border-radius:12px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 14px}
+        .feat h3{font-size:14px;font-weight:600;margin-bottom:6px}
+        .feat p{font-size:12px;color:var(--muted);line-height:1.5}
+
+        /* Steps */
+        .steps{padding:80px 24px;background:var(--surface)}
+        .steps-inner{max-width:800px;margin:0 auto;text-align:center}
+        .steps-inner h2{font-size:clamp(22px,3.5vw,32px);font-weight:700;margin-bottom:48px}
+        .steps-list{display:flex;gap:32px;justify-content:center;flex-wrap:wrap}
+        .step-item{flex:1;min-width:200px;max-width:240px;text-align:center}
+        .step-num{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-weight:700;font-size:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+        .step-item h3{font-size:15px;font-weight:600;margin-bottom:8px}
+        .step-item p{font-size:13px;color:var(--muted);line-height:1.5}
+
+        /* Final CTA */
+        .final-cta{padding:80px 24px;text-align:center}
+        .final-cta-inner{max-width:500px;margin:0 auto;padding:48px 32px;border-radius:20px;background:linear-gradient(135deg,var(--accent),#4f46e5);color:#fff;box-shadow:0 20px 60px var(--accent-glow)}
+        .final-cta-inner h2{font-size:clamp(20px,3vw,28px);font-weight:700;margin-bottom:12px}
+        .final-cta-inner p{font-size:14px;opacity:.85;margin-bottom:28px;line-height:1.5}
+        .final-cta-inner .btn{background:#fff;color:var(--accent);font-weight:700}
+        .final-cta-inner .btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.15)}
+
+        /* Footer */
+        .lfooter{padding:32px 24px;text-align:center;color:var(--muted);font-size:12px;border-top:1px solid var(--border)}
+
+        /* ===== AUTH MODALS ===== */
+        .modal-mask{position:fixed;inset:0;z-index:500;background:rgba(15,23,42,.4);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .3s var(--ease)}
+        .modal-mask.on{opacity:1;pointer-events:all}
+        .modal-box{width:100%;max-width:420px;background:var(--surface);border-radius:20px;padding:36px;box-shadow:var(--shadow-lg);transform:scale(.95);transition:transform .3s var(--ease)}
+        .modal-mask.on .modal-box{transform:scale(1)}
+        .modal-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s}
+        .modal-close:hover{background:var(--card-h);color:var(--text)}
+        .modal-box{position:relative}
+        .modal-head{text-align:center;margin-bottom:28px}
+        .modal-head h2{font-size:22px;font-weight:700;margin-bottom:6px}
+        .modal-head p{font-size:13px;color:var(--muted)}
+        .form-group{margin-bottom:16px}
+        .form-group label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
+        .form-input{width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s}
+        .form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+        .form-input::placeholder{color:var(--faint)}
+        .form-btn{width:100%;padding:13px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--accent),#4f46e5);color:#fff;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 14px var(--accent-glow);transition:all .2s;margin-top:8px}
+        .form-btn:hover{opacity:.92;transform:translateY(-1px)}
+        .form-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .form-footer{text-align:center;margin-top:20px;font-size:13px;color:var(--muted)}
+        .form-footer a{font-weight:600}
+        .form-error{color:#ef4444;font-size:12px;margin-top:6px;display:none}
+        .form-error.on{display:block}
+
+        /* ===== ONBOARDING ===== */
+        .onboarding{position:fixed;inset:0;z-index:600;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .4s var(--ease)}
+        .onboarding.on{opacity:1;pointer-events:all}
+        .ob-card{width:100%;max-width:480px;background:var(--surface);border-radius:20px;box-shadow:var(--shadow-lg);overflow:hidden}
+        .ob-header{padding:28px 32px 20px;text-align:center;border-bottom:1px solid var(--border)}
+        .ob-header h2{font-size:20px;font-weight:700;margin-bottom:4px}
+        .ob-header p{font-size:13px;color:var(--muted)}
+        .ob-steps{display:flex;gap:6px;justify-content:center;margin-top:16px}
+        .ob-step-dot{width:32px;height:4px;border-radius:3px;background:var(--faint);transition:background .3s}
+        .ob-step-dot.active{background:var(--accent)}
+        .ob-step-dot.done{background:var(--green)}
+        .ob-body{padding:28px 32px}
+        .ob-step{display:none}
+        .ob-step.active{display:block}
+
+        /* Photo upload */
+        .photo-upload{display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:20px}
+        .photo-preview{width:80px;height:80px;border-radius:50%;background:var(--accent-dim);border:2px dashed var(--faint);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;transition:border-color .2s}
+        .photo-preview:hover{border-color:var(--accent)}
+        .photo-preview img{width:100%;height:100%;object-fit:cover}
+        .photo-preview .placeholder{font-size:28px;color:var(--faint)}
+        .photo-label{font-size:12px;color:var(--accent);font-weight:500;cursor:pointer}
+
+        /* Currency select */
+        .currency-options{display:grid;gap:8px}
+        .currency-opt{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;border:1.5px solid var(--border);cursor:pointer;transition:all .2s;background:var(--bg)}
+        .currency-opt:hover{border-color:var(--border-h)}
+        .currency-opt.selected{border-color:var(--accent);background:var(--accent-dim)}
+        .currency-opt input{display:none}
+        .currency-flag{font-size:22px}
+        .currency-info{flex:1}
+        .currency-info strong{display:block;font-size:14px}
+        .currency-info span{font-size:12px;color:var(--muted)}
+        .currency-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--faint);display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:11px;color:transparent}
+        .currency-opt.selected .currency-check{border-color:var(--accent);background:var(--accent);color:#fff}
+
+        /* Accounts init */
+        .account-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+        .account-row:last-child{border:none}
+        .account-icon{font-size:20px;width:36px;text-align:center}
+        .account-name{flex:1;font-size:14px;font-weight:500}
+        .account-bal{width:120px}
+        .account-bal input{width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);text-align:right;font-size:13px;font-weight:600;outline:none;transition:border-color .2s}
+        .account-bal input:focus{border-color:var(--accent)}
+        .account-bal input::placeholder{color:var(--faint);font-weight:400}
+
+        /* PIN input */
+        .pin-wrap{display:flex;flex-direction:column;align-items:center;gap:20px}
+        .pin-dots{display:flex;gap:12px}
+        .pin-d{width:14px;height:14px;border-radius:50%;border:2px solid var(--faint);transition:all .2s}
+        .pin-d.on{background:var(--accent);border-color:var(--accent);box-shadow:0 0 10px var(--accent-glow)}
+        .pin-grid{display:grid;grid-template-columns:repeat(3,64px);gap:10px}
+        .pin-k{height:58px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:20px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;-webkit-tap-highlight-color:transparent}
+        .pin-k:hover{background:var(--card-h);border-color:var(--border-h)}
+        .pin-k:active{transform:scale(.93)}
+        .pin-k.empty{background:transparent;border:none;pointer-events:none}
+        .pin-k.del{font-size:14px;color:var(--muted)}
+        .pin-hint{font-size:12px;color:var(--muted);text-align:center}
+
+        .ob-footer{padding:0 32px 28px;display:flex;gap:12px}
+        .ob-footer .btn{flex:1}
+        .ob-footer .btn-back{background:var(--bg);color:var(--muted);border:1px solid var(--border)}
+
+        /* ===== DASHBOARD ===== */
+        .dashboard{position:fixed;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .5s var(--ease)}
+        .dashboard.on{opacity:1;pointer-events:all}
+        .dash-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 28px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0}
+        .dash-logo{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:700}
+        .dash-logo .lnav-dot{width:24px;height:24px;font-size:12px;border-radius:6px}
+        .dash-user{display:flex;align-items:center;gap:12px}
+        .dash-avatar{width:32px;height:32px;border-radius:50%;background:var(--accent-dim);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--accent);font-weight:600}
+        .dash-avatar img{width:100%;height:100%;object-fit:cover}
+        .dash-acts{display:flex;gap:8px}
+        .ibtn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);transition:all .18s}
+        .ibtn:hover{border-color:var(--border-h);color:var(--accent)}
+        .dash-main{flex:1;overflow-y:auto;padding:32px 28px;background:var(--bg)}
+        .dash-greet{margin-bottom:28px}
+        .dash-greet h1{font-size:22px;font-weight:600;margin-bottom:4px}
+        .dash-greet p{font-size:13px;color:var(--muted)}
+        .dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px}
+        .app-card{aspect-ratio:1;border-radius:var(--r);border:1px solid var(--border);background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;cursor:pointer;position:relative;overflow:hidden;box-shadow:var(--shadow-sm);transition:all .25s var(--ease);-webkit-tap-highlight-color:transparent}
+        .app-card::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,var(--accent-dim) 0%,transparent 70%);opacity:0;transition:opacity .25s}
+        .app-card:hover{border-color:var(--border-h);transform:translateY(-3px);box-shadow:var(--shadow-md)}
+        .app-card:hover::after{opacity:1}
+        .app-card-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;position:relative;z-index:1;font-size:24px}
+        .app-card-name{font-size:13px;font-weight:600;position:relative;z-index:1}
+        .app-card-desc{font-size:11px;color:var(--muted);position:relative;z-index:1}
+
+        /* App overlay */
         #ov{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .3s var(--ease)}
         #ov.on{opacity:1;pointer-events:all}
-        .ovh{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0}
-        .ovt{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:500;color:var(--text)}
-        .ovcl{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .18s var(--ease)}
-        .ovcl:hover{background:var(--card-h);color:var(--text);border-color:var(--border-h)}
+        .ovh{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0}
+        .ovt{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:500}
+        .ovcl{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .18s}
+        .ovcl:hover{background:var(--card-h);color:var(--text)}
         #fr{flex:1;border:none;background:var(--bg);width:100%}
-        /* Mobile overlay full screen */
-        @media(max-width:680px){
-            .ovh{padding:8px 14px}
-            .ovt span{font-size:12px}
-            .ovcl{width:30px;height:30px}
-        }
 
-        /* SETTINGS */
+        /* Settings panel */
         #sbd{position:fixed;inset:0;background:rgba(15,23,42,.3);backdrop-filter:blur(3px);z-index:599;opacity:0;pointer-events:none;transition:opacity .3s}
         #sbd.on{opacity:1;pointer-events:all}
-        #sp{position:fixed;top:0;right:0;bottom:0;width:320px;background:var(--surface);border-left:1px solid var(--border);box-shadow:-4px 0 24px rgba(15,23,42,.08);z-index:600;padding:28px 26px;transform:translateX(100%);transition:transform .32s var(--ease);overflow-y:auto}
+        #sp{position:fixed;top:0;right:0;bottom:0;width:340px;background:var(--surface);border-left:1px solid var(--border);box-shadow:-4px 0 24px rgba(15,23,42,.08);z-index:600;padding:28px 26px;transform:translateX(100%);transition:transform .32s var(--ease);overflow-y:auto}
         #sp.on{transform:translateX(0)}
         .shd{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px}
-        .shd span{font-size:15px;font-weight:600;color:var(--text)}
+        .shd span{font-size:15px;font-weight:600}
         .sg{margin-bottom:22px}
         .sl{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:10px;font-weight:500}
-        .si2{width:100%;padding:10px 13px;border-radius:var(--rs);border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13.5px;outline:none;margin-bottom:8px;transition:border-color .18s,background .18s}
-        .si2:focus{border-color:var(--accent);background:var(--surface)}
-        .sb{width:100%;padding:11px;border-radius:var(--rs);border:none;background:var(--accent);color:#fff;font-family:inherit;font-size:13.5px;font-weight:500;cursor:pointer;box-shadow:0 2px 8px var(--accent-glow);transition:opacity .18s,transform .18s}
-        .sb:hover{opacity:.92;transform:translateY(-1px)}
+        .si2{width:100%;padding:10px 13px;border-radius:var(--rs);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13.5px;outline:none;margin-bottom:8px;transition:border-color .2s}
+        .si2:focus{border-color:var(--accent)}
+        .sb{width:100%;padding:11px;border-radius:var(--rs);border:none;background:var(--accent);color:#fff;font-size:13.5px;font-weight:500;cursor:pointer;box-shadow:0 2px 8px var(--accent-glow);transition:opacity .2s}
+        .sb:hover{opacity:.92}
         .ssep{border:none;border-top:1px solid var(--border);margin:20px 0}
         .sb.dng{background:transparent;border:1px solid var(--border);color:var(--muted);box-shadow:none}
         .sb.dng:hover{border-color:#ef4444;color:#ef4444;background:rgba(239,68,68,.06)}
 
-        /* TOAST */
-        .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow-md);color:var(--text);border-radius:50px;padding:11px 22px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:opacity .28s,transform .28s var(--ease);pointer-events:none;white-space:nowrap}
+        /* Toast */
+        .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--text);color:#fff;border-radius:50px;padding:11px 22px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:opacity .28s,transform .28s var(--ease);pointer-events:none;white-space:nowrap}
         .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 
-        /* MOBILE RESPONSIVE */
-        @media(max-width:680px){
-            .hdr{padding:14px 18px}
-            .lname{display:none}
-            .main{padding:22px 18px}
+        /* Reveal animation */
+        .reveal{opacity:0;transform:translateY(24px);transition:opacity .6s var(--ease),transform .6s var(--ease)}
+        .reveal.visible{opacity:1;transform:translateY(0)}
+
+        /* ===== RESPONSIVE ===== */
+        @media(max-width:768px){
+            .lnav-inner{padding:0 16px;height:56px}
+            .lnav-links .hide-mobile{display:none}
+            .hero{padding:110px 20px 60px}
+            .hero h1{letter-spacing:-1px}
+            .pain,.features,.steps,.final-cta{padding:56px 20px}
+            .steps-list{gap:24px}
+            .step-item{min-width:100%;max-width:100%}
+            .features-grid{grid-template-columns:repeat(2,1fr);gap:12px}
+            .modal-box{padding:28px 24px}
+            .ob-body,.ob-footer{padding-left:24px;padding-right:24px}
+            .ob-header{padding:24px 24px 16px}
+            .dash-hdr{padding:14px 18px}
+            .dash-main{padding:22px 18px}
             #sp{width:100%}
-            .lt{font-size:clamp(48px,14vw,80px);letter-spacing:-2px}
-            .kp{grid-template-columns:repeat(3,62px);gap:9px}
-            .k{height:62px;font-size:18px;border-radius:12px}
-            .grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
-            .card{aspect-ratio:1;border-radius:12px}
-            .aico{width:40px;height:40px;border-radius:10px}
-            .aico svg{width:22px;height:22px}
-            .anm{font-size:12px}
-            .adesc{font-size:10px}
-            .greet h1{font-size:20px}
-            .greet p{font-size:12px}
-            .greet{margin-bottom:20px}
+            .dash-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+            .ovh{padding:8px 14px}
+            .ovt span{font-size:12px}
+            .pin-grid{grid-template-columns:repeat(3,58px);gap:8px}
+            .pin-k{height:52px;font-size:18px}
         }
-        @media(max-width:380px){
-            .kp{grid-template-columns:repeat(3,56px);gap:7px}
-            .k{height:56px;font-size:17px}
-            .lt{letter-spacing:-1px}
-            .lc{gap:24px}
+        @media(max-width:400px){
+            .features-grid{grid-template-columns:1fr}
+            .hero-ctas{flex-direction:column;align-items:center}
+            .hero-ctas .btn{width:100%;max-width:280px}
+            .pin-grid{grid-template-columns:repeat(3,52px);gap:7px}
+            .pin-k{height:48px;font-size:17px}
+            .account-bal{width:100px}
         }
-        /* PWA-like touch */
-        html{-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;overscroll-behavior:none}
-        body{-webkit-user-select:none;user-select:none}
-        input,textarea{-webkit-user-select:text;user-select:text}
-        /* Safe area for notched devices */
-        .hdr{padding-left:max(18px,env(safe-area-inset-left));padding-right:max(18px,env(safe-area-inset-right))}
-        .main{padding-left:max(18px,env(safe-area-inset-left));padding-right:max(18px,env(safe-area-inset-right));padding-bottom:max(32px,env(safe-area-inset-bottom))}
+        /* Safe areas */
+        .lnav-inner{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}
+        .dash-main{padding-bottom:max(32px,env(safe-area-inset-bottom))}
     </style>
 </head>
 <body>
 
-<!-- LOCK SCREEN -->
-<div id="lock">
-    <div class="lbg"></div>
-    <div class="lc">
-        <div>
-            <div class="lt" id="lt">00:00</div>
-            <div class="ld" id="ld">chargement...</div>
+<!-- ===== LANDING PAGE ===== -->
+<div id="landing" class="landing">
+    <nav class="lnav" id="lnav">
+        <div class="lnav-inner">
+            <div class="lnav-logo">
+                <div class="lnav-dot">₣</div>
+                <span>Mes Finances</span>
+            </div>
+            <div class="lnav-links">
+                <a href="#features-section" class="hide-mobile">Fonctionnalités</a>
+                <a href="#steps-section" class="hide-mobile">Comment ça marche</a>
+                <button class="btn btn-ghost btn-sm" onclick="showModal('login')">Se connecter</button>
+                <button class="btn btn-primary btn-sm" onclick="showModal('signup')">Créer un compte</button>
+            </div>
         </div>
-        <div class="lsep"></div>
-        <div class="llbl">Code d'acces</div>
-        <div class="dots" id="dots"></div>
-        <div class="kp" id="kp"></div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-inner">
+            <div class="hero-badge">✨ 100% gratuit • Vos données restent les vôtres</div>
+            <h1>Vos finances,<br>enfin <em>sous contrôle</em>.</h1>
+            <p>Fini le stress de fin de mois. Fini de se demander où est passé l'argent. Suivez chaque franc — sur Wave, Orange Money ou en banque — et reprenez le pouvoir sur votre vie financière.</p>
+            <div class="hero-ctas">
+                <button class="btn btn-primary btn-lg" onclick="showModal('signup')">🚀 Commencer gratuitement</button>
+                <a href="#pain-section" class="btn btn-ghost btn-lg">En savoir plus ↓</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="pain" id="pain-section">
+        <div class="pain-inner">
+            <div class="pain-head reveal">
+                <h2>On connaît cette sensation...</h2>
+                <p>Ces situations que vous vivez peut-être chaque mois.</p>
+            </div>
+            <div class="pain-grid">
+                <div class="pain-card reveal">
+                    <div class="pain-icon">💸</div>
+                    <h3>« Où est passé mon argent ? »</h3>
+                    <p>Vous recevez votre salaire, et deux semaines plus tard, il ne reste presque rien. Vous ne savez même pas où c'est parti. Les petites dépenses Wave par-ci, Orange Money par-là... ça s'accumule sans qu'on s'en rende compte.</p>
+                </div>
+                <div class="pain-card reveal">
+                    <div class="pain-icon">😰</div>
+                    <h3>« Encore 10 jours avant la paie... »</h3>
+                    <p>Le stress de compter les jours. De refuser une sortie entre amis. De repousser une facture. Vous méritez mieux que cette anxiété permanente. Vous méritez de la sérénité.</p>
+                </div>
+                <div class="pain-card reveal">
+                    <div class="pain-icon">🎯</div>
+                    <h3>« J'aimerais épargner, mais... »</h3>
+                    <p>Vous avez des rêves — un projet, un voyage, un commerce. Mais entre les dépenses quotidiennes, les imprévus et la famille à soutenir, épargner semble impossible. Et si ce n'était qu'une question de visibilité ?</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="features-section">
+        <div class="features-inner">
+            <div class="features-head reveal">
+                <h2>Tout ce qu'il vous faut, rien de superflu</h2>
+                <p>Des outils simples et puissants, conçus pour votre quotidien.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feat reveal"><div class="feat-icon">📊</div><h3>Tableau de bord</h3><p>Vue claire de vos finances en un coup d'œil. Revenus, dépenses, soldes.</p></div>
+                <div class="feat reveal"><div class="feat-icon">📱</div><h3>Multi-comptes</h3><p>Wave, Orange Money, Free Money, banque, espèces... tout au même endroit.</p></div>
+                <div class="feat reveal"><div class="feat-icon">🏷️</div><h3>27 catégories</h3><p>Alimentation, transport, santé, loisirs... classez sans effort.</p></div>
+                <div class="feat reveal"><div class="feat-icon">🎯</div><h3>Objectifs budget</h3><p>Fixez des limites et recevez des alertes quand vous approchez.</p></div>
+                <div class="feat reveal"><div class="feat-icon">🐷</div><h3>Cagnottes épargne</h3><p>Créez des objectifs d'épargne et suivez votre progression.</p></div>
+                <div class="feat reveal"><div class="feat-icon">📈</div><h3>Analyses visuelles</h3><p>Graphiques clairs pour comprendre vos habitudes financières.</p></div>
+                <div class="feat reveal"><div class="feat-icon">🔒</div><h3>Privé & sécurisé</h3><p>Code PIN, données chiffrées. Personne d'autre n'y accède.</p></div>
+                <div class="feat reveal"><div class="feat-icon">🌍</div><h3>Multi-devises</h3><p>FCFA, Euro, Dollar... choisissez votre devise préférée.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="steps" id="steps-section">
+        <div class="steps-inner">
+            <h2 class="reveal">Prêt en 30 secondes</h2>
+            <div class="steps-list">
+                <div class="step-item reveal"><div class="step-num">1</div><h3>Créez votre espace</h3><p>Un nom, un code PIN, et c'est parti. Pas besoin d'email ni de carte bancaire.</p></div>
+                <div class="step-item reveal"><div class="step-num">2</div><h3>Configurez vos comptes</h3><p>Ajoutez vos comptes Wave, Orange Money, banque... et renseignez vos soldes actuels.</p></div>
+                <div class="step-item reveal"><div class="step-num">3</div><h3>Suivez & économisez</h3><p>Notez vos dépenses en 2 clics. L'app fait le reste : analyses, alertes, conseils.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="final-cta">
+        <div class="final-cta-inner reveal">
+            <h2>Chaque franc compte.<br>Commencez maintenant.</h2>
+            <p>Rejoignez ceux qui ont décidé de reprendre le contrôle. C'est gratuit, c'est privé, c'est pour vous.</p>
+            <button class="btn btn-lg" onclick="showModal('signup')">Créer mon espace →</button>
+        </div>
+    </section>
+
+    <footer class="lfooter">
+        <p>Mes Finances © 2024 — Fait avec ❤️ pour votre sérénité financière</p>
+    </footer>
+</div>
+
+<!-- ===== LOGIN MODAL ===== -->
+<div class="modal-mask" id="modal-login">
+    <div class="modal-box">
+        <button class="modal-close" onclick="hideModals()">✕</button>
+        <div class="modal-head">
+            <h2>Bon retour ! 👋</h2>
+            <p>Connectez-vous à votre espace.</p>
+        </div>
+        <form id="form-login" onsubmit="return handleLogin(event)">
+            <div class="form-group">
+                <label>Adresse email</label>
+                <input class="form-input" type="email" id="login-email" placeholder="votre@email.com" required>
+            </div>
+            <div class="form-group">
+                <label>Mot de passe</label>
+                <input class="form-input" type="password" id="login-pass" placeholder="••••••••" required minlength="6">
+            </div>
+            <div class="form-error" id="login-error"></div>
+            <button class="form-btn" type="submit">Se connecter</button>
+        </form>
+        <div class="form-footer">
+            Pas encore de compte ? <a href="#" onclick="switchModal('signup');return false">Créer un compte</a>
+        </div>
     </div>
 </div>
 
-<!-- DASHBOARD -->
-<div id="db">
-    <header class="hdr">
-        <div class="logo">
-            <div class="ldot"></div>
-            <span class="lname">MySpace</span>
+<!-- ===== SIGNUP MODAL ===== -->
+<div class="modal-mask" id="modal-signup">
+    <div class="modal-box">
+        <button class="modal-close" onclick="hideModals()">✕</button>
+        <div class="modal-head">
+            <h2>Créer votre espace ✨</h2>
+            <p>30 secondes pour reprendre le contrôle.</p>
         </div>
-        <div class="acts">
-            <span class="dtm" id="dtm">00:00</span>
-            <button class="ibtn" id="bset" title="Parametres">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-            </button>
+        <form id="form-signup" onsubmit="return handleSignup(event)">
+            <div class="form-group">
+                <label>Votre prénom</label>
+                <input class="form-input" type="text" id="signup-name" placeholder="Ex: Mamadou, Sarah, Alex..." required>
+            </div>
+            <div class="form-group">
+                <label>Adresse email</label>
+                <input class="form-input" type="email" id="signup-email" placeholder="votre@email.com" required>
+            </div>
+            <div class="form-group">
+                <label>Mot de passe</label>
+                <input class="form-input" type="password" id="signup-pass" placeholder="6 caractères minimum" required minlength="6">
+            </div>
+            <div class="form-group">
+                <label>Confirmer le mot de passe</label>
+                <input class="form-input" type="password" id="signup-pass2" placeholder="Confirmez votre mot de passe" required minlength="6">
+            </div>
+            <div class="form-error" id="signup-error"></div>
+            <button class="form-btn" type="submit">Créer mon compte</button>
+        </form>
+        <div class="form-footer">
+            Déjà un compte ? <a href="#" onclick="switchModal('login');return false">Se connecter</a>
+        </div>
+    </div>
+</div>
+
+<!-- ===== ONBOARDING WIZARD ===== -->
+<div class="onboarding" id="onboarding">
+    <div class="ob-card">
+        <div class="ob-header">
+            <h2>Configurez votre espace 🎉</h2>
+            <p>Personnalisez tout à votre image.</p>
+            <div class="ob-steps" id="ob-dots"></div>
+        </div>
+
+        <!-- Step 1: Profil -->
+        <div class="ob-body">
+            <div class="ob-step active" id="ob-s1">
+                <div class="photo-upload">
+                    <div class="photo-preview" id="photo-prev" onclick="document.getElementById('photo-input').click()">
+                        <span class="placeholder">📷</span>
+                    </div>
+                    <label class="photo-label" for="photo-input">Choisir une photo de profil</label>
+                    <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="previewPhoto(this)">
+                </div>
+                <div class="form-group">
+                    <label>Votre nom ou surnom</label>
+                    <input class="form-input" type="text" id="ob-name" placeholder="Ex: Mamadou, Sarah, Alex...">
+                </div>
+            </div>
+
+            <!-- Step 2: Devise -->
+            <div class="ob-step" id="ob-s2">
+                <div class="form-group">
+                    <label style="margin-bottom:12px">Devise par défaut</label>
+                    <div class="currency-options" id="currency-list"></div>
+                </div>
+            </div>
+
+            <!-- Step 3: Comptes -->
+            <div class="ob-step" id="ob-s3">
+                <div class="form-group">
+                    <label style="margin-bottom:12px">Soldes actuels de vos comptes</label>
+                    <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Entrez le montant disponible sur chaque compte. Laissez vide si vous ne l'utilisez pas.</p>
+                    <div id="accounts-list"></div>
+                </div>
+            </div>
+
+            <!-- Step 4: PIN -->
+            <div class="ob-step" id="ob-s4">
+                <div class="pin-wrap">
+                    <p style="font-size:14px;font-weight:500;margin-bottom:4px">Code PIN d'accès</p>
+                    <p class="pin-hint">Choisissez un code de 4 à 6 chiffres pour protéger votre espace</p>
+                    <div class="pin-dots" id="ob-pin-dots"></div>
+                    <div class="pin-grid" id="ob-pin-grid"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ob-footer" id="ob-footer">
+            <button class="btn btn-back" id="ob-back" onclick="obPrev()" style="display:none">← Retour</button>
+            <button class="btn btn-primary" id="ob-next" onclick="obNext()">Continuer →</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== DASHBOARD ===== -->
+<div class="dashboard" id="dashboard">
+    <header class="dash-hdr">
+        <div class="dash-logo">
+            <div class="lnav-dot">₣</div>
+            <span>Mes Finances</span>
+        </div>
+        <div class="dash-user">
+            <div class="dash-avatar" id="dash-avatar"><span id="dash-initial">M</span></div>
+            <div class="dash-acts">
+                <button class="ibtn" id="bset" title="Paramètres">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                </button>
+            </div>
         </div>
     </header>
-    <main class="main">
-        <div class="greet">
-            <h1 id="gt">Bonjour</h1>
-            <p id="gs"></p>
+    <main class="dash-main">
+        <div class="dash-greet">
+            <h1 id="dash-greet-text">Bonjour</h1>
+            <p id="dash-greet-sub"></p>
         </div>
-        <div class="grid" id="grid">
-            <div class="card" id="card-budget">
-                <div class="aico" style="color:#0f67d1;background:rgba(15,103,209,.08)">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7V5a2 2 0 0 0-2-2H6a3 3 0 0 0-3 3v12a2 2 0 0 0 2 2h15V7H6a1 1 0 0 1 0-2"/><path d="M20 11h-5v5h5M16.5 13.5h.1"/></svg>
-                </div>
-                <div class="anm">Grand Livre</div>
-                <div class="adesc">Budget & Dépenses</div>
+        <div class="dash-grid" id="dash-grid">
+            <div class="app-card" id="card-budget">
+                <div class="app-card-icon" style="color:#0f67d1;background:rgba(15,103,209,.08)">💰</div>
+                <div class="app-card-name">Mes Finances</div>
+                <div class="app-card-desc">Budget & Dépenses</div>
             </div>
         </div>
     </main>
 </div>
 
-<!-- APP OVERLAY -->
+<!-- ===== APP OVERLAY ===== -->
 <div id="ov">
     <div class="ovh">
         <div class="ovt">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f67d1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7V5a2 2 0 0 0-2-2H6a3 3 0 0 0-3 3v12a2 2 0 0 0 2 2h15V7H6a1 1 0 0 1 0-2"/><path d="M20 11h-5v5h5M16.5 13.5h.1"/></svg>
-            <span>Grand Livre · Budget & Dépenses</span>
+            <span>💰</span>
+            <span>Mes Finances · Budget & Dépenses</span>
         </div>
         <div style="display:flex;gap:8px">
             <a href="apps/budget/index.html" target="_blank" class="ovcl" title="Ouvrir dans un nouvel onglet" style="text-decoration:none">↗</a>
@@ -211,16 +556,16 @@
     <iframe id="fr" src="" allow="fullscreen"></iframe>
 </div>
 
-<!-- SETTINGS -->
+<!-- ===== SETTINGS PANEL ===== -->
 <div id="sbd"></div>
 <div id="sp">
-    <div class="shd"><span>Parametres</span>
+    <div class="shd"><span>Paramètres</span>
         <button class="ibtn" id="bsc">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
     </div>
     <div class="sg">
-        <div class="sl">Nom affiche</div>
+        <div class="sl">Nom affiché</div>
         <input id="sn" class="si2" type="text" placeholder="Mon espace...">
         <button class="sb" id="bsn">Enregistrer le nom</button>
     </div>
@@ -228,13 +573,13 @@
     <div class="sg">
         <div class="sl">Changer le PIN</div>
         <input id="pc" class="si2" type="password" placeholder="Code actuel" maxlength="8">
-        <input id="pn" class="si2" type="password" placeholder="Nouveau code (4-8 chiffres)" maxlength="8">
+        <input id="pn" class="si2" type="password" placeholder="Nouveau code (4-6 chiffres)" maxlength="8">
         <input id="pf" class="si2" type="password" placeholder="Confirmer" maxlength="8">
-        <button class="sb" id="bsp">Mettre a jour le PIN</button>
+        <button class="sb" id="bsp">Mettre à jour le PIN</button>
     </div>
     <hr class="ssep">
-    <button class="sb dng" id="bdelall" style="margin-bottom:10px;border-color:rgba(239,68,68,.3);color:#ef4444">Effacer toutes les donnees</button>
-    <button class="sb dng" id="blk">Verrouiller la session</button>
+    <button class="sb dng" id="bdelall" style="margin-bottom:10px;border-color:rgba(239,68,68,.3);color:#ef4444">Effacer toutes les données</button>
+    <button class="sb dng" id="blk">Se déconnecter</button>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -242,140 +587,383 @@
 <script>
 'use strict';
 
-const RANDOM_GREETINGS = [
-    "Prêt pour une nouvelle session productive ?",
-    "Chaque petit pas mène à de grands accomplissements.",
-    "Que souhaitez-vous explorer aujourd'hui ?",
-    "Concentration maximale, esprit serein.",
-    "Votre espace de travail est prêt.",
-    "L'efficacité commence par de bons outils.",
-    "Prenez une grande inspiration et créez l'extraordinaire.",
-    "Bienvenue dans votre centre de contrôle."
+/* ===== STATE ===== */
+const DB_USERS = 'mf_users';
+const DB_ACTIVE = 'mf_active_user';
+let users = JSON.parse(localStorage.getItem(DB_USERS) || '[]');
+let activeUser = null;
+let obStep = 0;
+let obPin = '';
+let obPhoto = '';
+
+const CURRENCIES = [
+    { code: 'FCFA', flag: '🇸🇳', name: 'Franc CFA', sub: 'XOF / XAF' },
+    { code: '€',    flag: '🇪🇺', name: 'Euro', sub: 'EUR' },
+    { code: '$',    flag: '🇺🇸', name: 'Dollar US', sub: 'USD' },
+    { code: '£',    flag: '🇬🇧', name: 'Livre Sterling', sub: 'GBP' },
+    { code: 'CHF',  flag: '🇨🇭', name: 'Franc Suisse', sub: 'CHF' },
+    { code: 'CAD',  flag: '🇨🇦', name: 'Dollar Canadien', sub: 'CAD' }
 ];
 
-let currentRandomGreeting = RANDOM_GREETINGS[Math.floor(Math.random() * RANDOM_GREETINGS.length)];
+const ACCOUNTS = [
+    { id: 'cash',   icon: '💵', name: 'Espèces (Cash)' },
+    { id: 'wave',   icon: '🌊', name: 'Wave' },
+    { id: 'om',     icon: '🟠', name: 'Orange Money' },
+    { id: 'bank',   icon: '🏦', name: 'Compte bancaire' },
+    { id: 'free',   icon: '📱', name: 'Free Money' },
+    { id: 'moov',   icon: '📲', name: 'Moov Money' }
+];
 
-function refreshGreetingText() {
-    currentRandomGreeting = RANDOM_GREETINGS[Math.floor(Math.random() * RANDOM_GREETINGS.length)];
-    tick();
-}
+const GREETINGS = [
+    "Prêt pour une nouvelle session productive ?",
+    "Chaque petit pas mène à de grands accomplissements.",
+    "Votre espace de travail est prêt.",
+    "L'efficacité commence par de bons outils.",
+    "Bienvenue dans votre centre de contrôle.",
+    "Prenez le contrôle de vos finances aujourd'hui."
+];
 
-const S={
-    pin: localStorage.getItem('ms_pin')||'1234',
-    name:localStorage.getItem('ms_name')||'MySpace',
-    ent:'',locked:true
-};
-const q=id=>document.getElementById(id);
-const lock=q('lock'),db=q('db');
-const lt=q('lt'),ld=q('ld'),dtm=q('dtm'),gt=q('gt'),gs=q('gs');
-const sp=q('sp'),sbd=q('sbd'),toast=q('toast');
+const q = id => document.getElementById(id);
 
-function tick(){
-    const n=new Date();
-    const t=n.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-    const d=n.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
-    lt.textContent=dtm.textContent=t;
-    ld.textContent=d;
-    gt.textContent = currentRandomGreeting;
-    const formattedDate = d.charAt(0).toUpperCase() + d.slice(1);
-    gs.textContent = `${formattedDate} • ${S.name}`;
-}
-setInterval(tick,1000);tick();
+/* ===== LANDING SCROLL ===== */
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.15 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-function bldDots(){
-    const c=q('dots'); c.innerHTML='';
-    for(let i=0;i<S.pin.length;i++){
-        const d=document.createElement('div');
-        d.className='dot'+(i<S.ent.length?' on':'');
-        c.appendChild(d);
-    }
-}
-function bldKp(){
-    const kp=q('kp'); kp.innerHTML='';
-    [1,2,3,4,5,6,7,8,9,'',0,'del'].forEach(k=>{
-        const b=document.createElement('button');
-        if(k===''){b.className='k empty';}
-        else if(k==='del'){
-            b.className='k del';
-            b.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg>';
-            b.onclick=()=>dg('del');
-        }else{
-            b.className='k'; b.textContent=k; b.onclick=()=>dg(String(k));
-        }
-        kp.appendChild(b);
-    });
-}
-function dg(v){
-    if(v==='del') S.ent=S.ent.slice(0,-1);
-    else if(S.ent.length<S.pin.length) S.ent+=v;
-    bldDots();
-    if(S.ent.length===S.pin.length) setTimeout(chk,120);
-}
-function chk(){
-    if(S.ent===S.pin){
-        S.locked=false;
-        S.ent='';
-        refreshGreetingText();
-        lock.classList.add('hidden');
-        db.classList.add('on');
-    }
-    else{
-        q('dots').querySelectorAll('.dot').forEach(d=>d.classList.add('err'));
-        setTimeout(()=>{S.ent='';bldDots();},650);
-    }
-}
-function doLock(){
-    S.locked=true;S.ent='';bldDots();
-    lock.classList.remove('hidden');db.classList.remove('on');
-    closeSet();
-}
-document.addEventListener('keydown',e=>{
-    if(S.locked){
-        if(e.key>='0'&&e.key<='9') dg(e.key);
-        if(e.key==='Backspace') dg('del');
-        return;
-    }
-    if(e.key==='Escape'){
-        if(ov.classList.contains('on')){ closeApp(); return; }
-        closeSet();
-    }
+window.addEventListener('scroll', () => {
+    q('lnav').classList.toggle('scrolled', window.scrollY > 20);
 });
 
-function openSet(){q('sn').value=S.name;sp.classList.add('on');sbd.classList.add('on');}
-function closeSet(){sp.classList.remove('on');sbd.classList.remove('on');}
-q('bset').onclick=openSet;q('bsc').onclick=closeSet;sbd.onclick=closeSet;
-q('blk').onclick=doLock;
-q('bdelall').onclick=()=>{
-    if(confirm("Attention : Voulez-vous vraiment effacer toutes les donnees du Grand Livre et reinitialiser l'application ?\n\nCette action est irreversible.")){
-        localStorage.clear();
-        location.reload();
-    }
-};
-
-q('bsn').onclick=()=>{
-    const v=q('sn').value.trim();
-    if(!v)return showToast('Entrez un nom valide');
-    S.name=v;localStorage.setItem('ms_name',v);showToast('Nom mis a jour');
-};
-q('bsp').onclick=()=>{
-    const c=q('pc').value,n=q('pn').value,f=q('pf').value;
-    if(c!==S.pin)return showToast('Code actuel incorrect');
-    if(!/^\d{4,8}$/.test(n))return showToast('4 a 8 chiffres requis');
-    if(n!==f)return showToast('Les codes ne correspondent pas');
-    S.pin=n;localStorage.setItem('ms_pin',n);
-    [q('pc'),q('pn'),q('pf')].forEach(el=>el.value='');
-    bldDots();showToast('PIN mis a jour avec succes');
-};
-
-let _tm;
-function showToast(msg){
-    clearTimeout(_tm);toast.textContent=msg;toast.classList.add('on');
-    _tm=setTimeout(()=>toast.classList.remove('on'),3200);
+/* ===== AUTH MODALS ===== */
+function showModal(type) {
+    hideModals();
+    q('modal-' + type).classList.add('on');
+}
+function hideModals() {
+    document.querySelectorAll('.modal-mask').forEach(m => m.classList.remove('on'));
+}
+function switchModal(type) {
+    hideModals();
+    setTimeout(() => showModal(type), 150);
 }
 
-const ov=q('ov'),fr=q('fr');
+// Close on mask click
+document.querySelectorAll('.modal-mask').forEach(mask => {
+    mask.addEventListener('click', e => { if (e.target === mask) hideModals(); });
+});
+
+function showError(id, msg) {
+    const el = q(id);
+    el.textContent = msg;
+    el.classList.add('on');
+    setTimeout(() => el.classList.remove('on'), 4000);
+}
+
+function handleSignup(e) {
+    e.preventDefault();
+    const name = q('signup-name').value.trim();
+    const email = q('signup-email').value.trim().toLowerCase();
+    const pass = q('signup-pass').value;
+    const pass2 = q('signup-pass2').value;
+
+    if (!name) return showError('signup-error', 'Entrez votre prénom');
+    if (!email) return showError('signup-error', 'Entrez votre email');
+    if (pass.length < 6) return showError('signup-error', 'Le mot de passe doit faire au moins 6 caractères');
+    if (pass !== pass2) return showError('signup-error', 'Les mots de passe ne correspondent pas');
+    if (users.find(u => u.email === email)) return showError('signup-error', 'Un compte existe déjà avec cet email');
+
+    const user = {
+        id: 'u_' + Date.now(),
+        name,
+        email,
+        password: btoa(pass), // simple encoding for local, Supabase will handle real auth later
+        pin: '',
+        currency: 'FCFA',
+        photo: '',
+        accounts: [],
+        createdAt: new Date().toISOString()
+    };
+    users.push(user);
+    localStorage.setItem(DB_USERS, JSON.stringify(users));
+    activeUser = user;
+    localStorage.setItem(DB_ACTIVE, user.id);
+
+    hideModals();
+    q('form-signup').reset();
+    startOnboarding();
+    return false;
+}
+
+function handleLogin(e) {
+    e.preventDefault();
+    const email = q('login-email').value.trim().toLowerCase();
+    const pass = q('login-pass').value;
+
+    const user = users.find(u => u.email === email);
+    if (!user) return showError('login-error', 'Aucun compte trouvé avec cet email');
+    if (atob(user.password) !== pass) return showError('login-error', 'Mot de passe incorrect');
+
+    activeUser = user;
+    localStorage.setItem(DB_ACTIVE, user.id);
+    hideModals();
+    q('form-login').reset();
+    enterDashboard();
+    return false;
+}
+
+/* ===== ONBOARDING ===== */
+const OB_TOTAL = 4;
+
+function startOnboarding() {
+    obStep = 0;
+    obPin = '';
+    obPhoto = '';
+    q('ob-name').value = activeUser.name;
+    buildObDots();
+    buildCurrencyList();
+    buildAccountsList();
+    buildObPinPad();
+    showObStep(0);
+    q('onboarding').classList.add('on');
+}
+
+function buildObDots() {
+    const c = q('ob-dots');
+    c.innerHTML = '';
+    for (let i = 0; i < OB_TOTAL; i++) {
+        const d = document.createElement('div');
+        d.className = 'ob-step-dot';
+        c.appendChild(d);
+    }
+    updateObDots();
+}
+
+function updateObDots() {
+    q('ob-dots').querySelectorAll('.ob-step-dot').forEach((d, i) => {
+        d.className = 'ob-step-dot' + (i === obStep ? ' active' : i < obStep ? ' done' : '');
+    });
+}
+
+function showObStep(n) {
+    obStep = n;
+    for (let i = 1; i <= OB_TOTAL; i++) {
+        const el = q('ob-s' + i);
+        if (el) el.classList.toggle('active', i === n + 1);
+    }
+    updateObDots();
+    q('ob-back').style.display = n > 0 ? '' : 'none';
+    if (n === OB_TOTAL - 1) {
+        q('ob-next').textContent = '✨ Initialiser mon espace';
+        q('ob-next').style.background = 'linear-gradient(135deg,#10b981,#059669)';
+    } else {
+        q('ob-next').textContent = 'Continuer →';
+        q('ob-next').style.background = '';
+    }
+}
+
+function obNext() {
+    if (obStep === 0) {
+        const name = q('ob-name').value.trim();
+        if (!name) return showToast('Entrez votre nom ou surnom');
+        activeUser.name = name;
+        activeUser.photo = obPhoto;
+    } else if (obStep === 1) {
+        const sel = document.querySelector('.currency-opt.selected');
+        if (sel) activeUser.currency = sel.dataset.code;
+    } else if (obStep === 2) {
+        // Collect account balances
+        const accs = [];
+        ACCOUNTS.forEach(a => {
+            const input = q('acc-' + a.id);
+            const val = parseFloat(input.value) || 0;
+            if (val > 0) accs.push({ id: a.id, name: a.name, balance: val });
+        });
+        activeUser.accounts = accs;
+    } else if (obStep === 3) {
+        if (obPin.length < 4) return showToast('Entrez un code PIN de 4 à 6 chiffres');
+        activeUser.pin = obPin;
+
+        // Save user
+        const idx = users.findIndex(u => u.id === activeUser.id);
+        if (idx !== -1) users[idx] = activeUser;
+        localStorage.setItem(DB_USERS, JSON.stringify(users));
+
+        // Initialize budget app data for this user
+        initBudgetData();
+
+        q('onboarding').classList.remove('on');
+        enterDashboard();
+        showToast('🎉 Votre espace est prêt !');
+        return;
+    }
+
+    showObStep(obStep + 1);
+}
+
+function obPrev() {
+    if (obStep > 0) showObStep(obStep - 1);
+}
+
+function buildCurrencyList() {
+    const c = q('currency-list');
+    c.innerHTML = '';
+    CURRENCIES.forEach((cur, i) => {
+        const div = document.createElement('div');
+        div.className = 'currency-opt' + (i === 0 ? ' selected' : '');
+        div.dataset.code = cur.code;
+        div.innerHTML = `
+            <span class="currency-flag">${cur.flag}</span>
+            <div class="currency-info"><strong>${cur.code}</strong><span>${cur.name} — ${cur.sub}</span></div>
+            <div class="currency-check">✓</div>
+        `;
+        div.onclick = () => {
+            c.querySelectorAll('.currency-opt').forEach(o => o.classList.remove('selected'));
+            div.classList.add('selected');
+        };
+        c.appendChild(div);
+    });
+}
+
+function buildAccountsList() {
+    const c = q('accounts-list');
+    c.innerHTML = '';
+    ACCOUNTS.forEach(a => {
+        const row = document.createElement('div');
+        row.className = 'account-row';
+        row.innerHTML = `
+            <span class="account-icon">${a.icon}</span>
+            <span class="account-name">${a.name}</span>
+            <div class="account-bal"><input type="number" id="acc-${a.id}" placeholder="0" min="0"></div>
+        `;
+        c.appendChild(row);
+    });
+}
+
+function buildObPinPad() {
+    obPin = '';
+    const dotsC = q('ob-pin-dots');
+    dotsC.innerHTML = '';
+    for (let i = 0; i < 6; i++) {
+        const d = document.createElement('div');
+        d.className = 'pin-d';
+        dotsC.appendChild(d);
+    }
+
+    const grid = q('ob-pin-grid');
+    grid.innerHTML = '';
+    [1,2,3,4,5,6,7,8,9,'',0,'del'].forEach(k => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        if (k === '') { b.className = 'pin-k empty'; }
+        else if (k === 'del') {
+            b.className = 'pin-k del';
+            b.textContent = '⌫';
+            b.onclick = () => obPinKey('del');
+        } else {
+            b.className = 'pin-k';
+            b.textContent = k;
+            b.onclick = () => obPinKey(String(k));
+        }
+        grid.appendChild(b);
+    });
+}
+
+function obPinKey(v) {
+    if (v === 'del') obPin = obPin.slice(0, -1);
+    else if (obPin.length < 6) obPin += v;
+
+    const dots = q('ob-pin-dots').querySelectorAll('.pin-d');
+    dots.forEach((d, i) => d.classList.toggle('on', i < obPin.length));
+}
+
+function previewPhoto(input) {
+    if (!input.files || !input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        obPhoto = e.target.result;
+        const prev = q('photo-prev');
+        prev.innerHTML = '<img src="' + obPhoto + '" alt="Photo">';
+    };
+    reader.readAsDataURL(input.files[0]);
+}
+
+function initBudgetData() {
+    // Set budget app storage keys for the active user
+    // The budget app uses budget_active_user_id and budget_data_<id>
+    const uid = activeUser.id;
+
+    // Create user entry for budget app auth system
+    const budgetUsers = JSON.parse(localStorage.getItem('budget_users') || '[]');
+    if (!budgetUsers.find(u => u.id === uid)) {
+        budgetUsers.push({
+            id: uid,
+            name: activeUser.name,
+            pin: activeUser.pin,
+            photo: activeUser.photo || '',
+            createdAt: activeUser.createdAt
+        });
+        localStorage.setItem('budget_users', JSON.stringify(budgetUsers));
+    }
+    localStorage.setItem('budget_active_user_id', uid);
+
+    // Set currency preference
+    const uiKey = 'budget-workbench.ui.v1';
+    const existing = JSON.parse(localStorage.getItem(uiKey) || '{}');
+    existing.currency = activeUser.currency;
+    localStorage.setItem(uiKey, JSON.stringify(existing));
+}
+
+/* ===== DASHBOARD ===== */
+function enterDashboard() {
+    q('landing').style.display = 'none';
+    q('dashboard').classList.add('on');
+    updateDashboard();
+}
+
+function updateDashboard() {
+    if (!activeUser) return;
+    const initial = activeUser.name.charAt(0).toUpperCase();
+    q('dash-initial').textContent = initial;
+
+    const avatarEl = q('dash-avatar');
+    if (activeUser.photo) {
+        avatarEl.innerHTML = '<img src="' + activeUser.photo + '" alt="">';
+    } else {
+        avatarEl.innerHTML = '<span id="dash-initial">' + initial + '</span>';
+    }
+
+    const hour = new Date().getHours();
+    let greeting = 'Bonjour';
+    if (hour >= 18) greeting = 'Bonsoir';
+    else if (hour >= 12) greeting = 'Bon après-midi';
+
+    const randomSub = GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
+    const d = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+    const formattedDate = d.charAt(0).toUpperCase() + d.slice(1);
+
+    q('dash-greet-text').textContent = greeting + ', ' + activeUser.name + ' 👋';
+    q('dash-greet-sub').textContent = formattedDate;
+
+    // Settings
+    q('sn').value = activeUser.name;
+}
+
+function leaveDashboard() {
+    q('dashboard').classList.remove('on');
+    q('landing').style.display = '';
+    activeUser = null;
+    localStorage.removeItem(DB_ACTIVE);
+}
+
+/* ===== APP OVERLAY ===== */
+const ov = q('ov'), fr = q('fr');
 
 function launchApp(url) {
+    // Make sure budget app has the right user
+    if (activeUser) {
+        localStorage.setItem('budget_active_user_id', activeUser.id);
+    }
     fr.src = url;
     ov.classList.add('on');
 }
@@ -385,17 +973,100 @@ function closeApp() {
     setTimeout(() => { fr.src = ''; }, 250);
 }
 
-const cardBudget = q('card-budget');
-if (cardBudget) {
-    cardBudget.onclick = () => launchApp('apps/budget/index.html?v=' + Date.now());
+q('card-budget').onclick = () => launchApp('apps/budget/index.html?v=' + Date.now());
+q('bcl').onclick = closeApp;
+
+/* ===== SETTINGS ===== */
+function openSet() { q('sn').value = activeUser.name; q('sp').classList.add('on'); q('sbd').classList.add('on'); }
+function closeSet() { q('sp').classList.remove('on'); q('sbd').classList.remove('on'); }
+
+q('bset').onclick = openSet;
+q('bsc').onclick = closeSet;
+q('sbd').onclick = closeSet;
+
+q('blk').onclick = () => {
+    closeSet();
+    leaveDashboard();
+    showToast('Déconnecté avec succès');
+};
+
+q('bdelall').onclick = () => {
+    if (confirm("Attention : Voulez-vous vraiment effacer toutes vos données et supprimer votre compte ?\n\nCette action est irréversible.")) {
+        if (activeUser) {
+            users = users.filter(u => u.id !== activeUser.id);
+            localStorage.setItem(DB_USERS, JSON.stringify(users));
+            // Clean budget data for this user
+            const keys = Object.keys(localStorage).filter(k => k.includes(activeUser.id));
+            keys.forEach(k => localStorage.removeItem(k));
+        }
+        closeSet();
+        leaveDashboard();
+        showToast('Compte supprimé');
+    }
+};
+
+q('bsn').onclick = () => {
+    const v = q('sn').value.trim();
+    if (!v) return showToast('Entrez un nom valide');
+    activeUser.name = v;
+    const idx = users.findIndex(u => u.id === activeUser.id);
+    if (idx !== -1) users[idx] = activeUser;
+    localStorage.setItem(DB_USERS, JSON.stringify(users));
+    updateDashboard();
+    showToast('Nom mis à jour');
+};
+
+q('bsp').onclick = () => {
+    const c = q('pc').value, n = q('pn').value, f = q('pf').value;
+    if (c !== activeUser.pin) return showToast('Code actuel incorrect');
+    if (!/^\d{4,6}$/.test(n)) return showToast('4 à 6 chiffres requis');
+    if (n !== f) return showToast('Les codes ne correspondent pas');
+    activeUser.pin = n;
+    const idx = users.findIndex(u => u.id === activeUser.id);
+    if (idx !== -1) users[idx] = activeUser;
+    localStorage.setItem(DB_USERS, JSON.stringify(users));
+
+    // Also update budget app user
+    const budgetUsers = JSON.parse(localStorage.getItem('budget_users') || '[]');
+    const bIdx = budgetUsers.findIndex(u => u.id === activeUser.id);
+    if (bIdx !== -1) { budgetUsers[bIdx].pin = n; localStorage.setItem('budget_users', JSON.stringify(budgetUsers)); }
+
+    [q('pc'), q('pn'), q('pf')].forEach(el => el.value = '');
+    showToast('PIN mis à jour avec succès');
+};
+
+/* ===== TOAST ===== */
+let _tm;
+function showToast(msg) {
+    clearTimeout(_tm);
+    q('toast').textContent = msg;
+    q('toast').classList.add('on');
+    _tm = setTimeout(() => q('toast').classList.remove('on'), 3200);
 }
 
-const bcl = q('bcl');
-if (bcl) {
-    bcl.onclick = closeApp;
-}
+/* ===== KEYBOARD ===== */
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        if (ov.classList.contains('on')) { closeApp(); return; }
+        hideModals();
+        closeSet();
+    }
+});
 
-bldDots();bldKp();
+/* ===== AUTO-LOGIN ===== */
+(function init() {
+    const savedId = localStorage.getItem(DB_ACTIVE);
+    if (savedId) {
+        const user = users.find(u => u.id === savedId);
+        if (user) {
+            activeUser = user;
+            enterDashboard();
+            return;
+        }
+    }
+    // Show landing page
+    q('landing').style.display = '';
+})();
 </script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 {
-  "name": "MySpace - Dashboard",
-  "short_name": "MySpace",
-  "description": "Tableau de bord personnel — Grand Livre, Budget & Finances",
+  "name": "Mes Finances",
+  "short_name": "Mes Finances",
+  "description": "Tableau de bord personnel — Mes Finances, Budget & Finances",
   "start_url": "/index.html",
   "display": "standalone",
   "orientation": "portrait",
