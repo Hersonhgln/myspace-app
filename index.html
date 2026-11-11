@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Tableau de bord personnel — acces prive">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MySpace">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.svg">
     <title>MySpace - Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -78,7 +85,13 @@
         .ovt{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:500;color:var(--text)}
         .ovcl{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .18s var(--ease)}
         .ovcl:hover{background:var(--card-h);color:var(--text);border-color:var(--border-h)}
-        #fr{flex:1;border:none;background:var(--bg)}
+        #fr{flex:1;border:none;background:var(--bg);width:100%}
+        /* Mobile overlay full screen */
+        @media(max-width:680px){
+            .ovh{padding:8px 14px}
+            .ovt span{font-size:12px}
+            .ovcl{width:30px;height:30px}
+        }
 
         /* SETTINGS */
         #sbd{position:fixed;inset:0;background:rgba(15,23,42,.3);backdrop-filter:blur(3px);z-index:599;opacity:0;pointer-events:none;transition:opacity .3s}
@@ -101,12 +114,38 @@
         .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow-md);color:var(--text);border-radius:50px;padding:11px 22px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:opacity .28s,transform .28s var(--ease);pointer-events:none;white-space:nowrap}
         .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 
+        /* MOBILE RESPONSIVE */
         @media(max-width:680px){
             .hdr{padding:14px 18px}
             .lname{display:none}
             .main{padding:22px 18px}
             #sp{width:100%}
+            .lt{font-size:clamp(48px,14vw,80px);letter-spacing:-2px}
+            .kp{grid-template-columns:repeat(3,62px);gap:9px}
+            .k{height:62px;font-size:18px;border-radius:12px}
+            .grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+            .card{aspect-ratio:1;border-radius:12px}
+            .aico{width:40px;height:40px;border-radius:10px}
+            .aico svg{width:22px;height:22px}
+            .anm{font-size:12px}
+            .adesc{font-size:10px}
+            .greet h1{font-size:20px}
+            .greet p{font-size:12px}
+            .greet{margin-bottom:20px}
         }
+        @media(max-width:380px){
+            .kp{grid-template-columns:repeat(3,56px);gap:7px}
+            .k{height:56px;font-size:17px}
+            .lt{letter-spacing:-1px}
+            .lc{gap:24px}
+        }
+        /* PWA-like touch */
+        html{-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;overscroll-behavior:none}
+        body{-webkit-user-select:none;user-select:none}
+        input,textarea{-webkit-user-select:text;user-select:text}
+        /* Safe area for notched devices */
+        .hdr{padding-left:max(18px,env(safe-area-inset-left));padding-right:max(18px,env(safe-area-inset-right))}
+        .main{padding-left:max(18px,env(safe-area-inset-left));padding-right:max(18px,env(safe-area-inset-right));padding-bottom:max(32px,env(safe-area-inset-bottom))}
     </style>
 </head>
 <body>
