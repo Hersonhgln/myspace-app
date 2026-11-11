@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Tableau de bord personnel — acces prive">
+    <title>MySpace - Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --bg:#f8fafc;--surface:#ffffff;--card:#ffffff;--card-h:#f1f5f9;
+            --accent:#6366f1;--accent-dim:rgba(99,102,241,.08);--accent-glow:rgba(99,102,241,.24);
+            --text:#0f172a;--muted:#64748b;--faint:#cbd5e1;
+            --border:rgba(15,23,42,.08);--border-h:rgba(99,102,241,.45);
+            --shadow-sm:0 1px 3px rgba(15,23,42,.05);
+            --shadow-md:0 8px 24px rgba(15,23,42,.07);
+            --r:16px;--rs:10px;--ease:cubic-bezier(.4,0,.2,1)
+        }
+        html,body{height:100%;font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
+
+        /* LOCK */
+        #lock{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);z-index:1000;transition:opacity .55s var(--ease),transform .55s var(--ease)}
+        #lock.hidden{opacity:0;transform:scale(1.04);pointer-events:none}
+        .lbg{position:absolute;inset:0;background:radial-gradient(ellipse 90% 55% at 50% -10%,rgba(99,102,241,.12) 0%,transparent 68%),radial-gradient(ellipse 55% 40% at 90% 110%,rgba(99,102,241,.06) 0%,transparent 60%)}
+        .lbg::after{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(15,23,42,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(15,23,42,.025) 1px,transparent 1px);background-size:56px 56px}
+        .lc{position:relative;display:flex;flex-direction:column;align-items:center;gap:36px}
+        .lt{font-size:clamp(64px,11vw,104px);font-weight:300;letter-spacing:-4px;line-height:1;font-variant-numeric:tabular-nums;color:var(--text)}
+        .ld{margin-top:10px;font-size:13px;color:var(--muted);letter-spacing:.06em;text-transform:capitalize}
+        .lsep{width:36px;height:1px;background:var(--border)}
+        .llbl{font-size:11.5px;font-weight:500;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+        .dots{display:flex;gap:14px}
+        .dot{width:11px;height:11px;border-radius:50%;border:1.5px solid var(--faint);transition:all .15s;background:transparent}
+        .dot.on{background:var(--accent);border-color:var(--accent);box-shadow:0 0 14px var(--accent-glow)}
+        .dot.err{background:#ef4444;border-color:#ef4444;animation:shk .4s var(--ease)}
+        @keyframes shk{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+        .kp{display:grid;grid-template-columns:repeat(3,70px);gap:11px}
+        .k{height:70px;border-radius:14px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:inherit;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);transition:background .15s,border-color .15s,transform .1s,box-shadow .15s;-webkit-tap-highlight-color:transparent}
+        .k:hover{background:var(--card-h);border-color:var(--border-h);box-shadow:var(--shadow-md)}
+        .k:active{transform:scale(.94)}
+        .k.empty{background:transparent;border:none;box-shadow:none;pointer-events:none}
+        .k.del{font-size:13px;color:var(--muted)}
+
+        /* DASHBOARD */
+        #db{position:fixed;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .5s var(--ease)}
+        #db.on{opacity:1;pointer-events:all}
+        .hdr{display:flex;align-items:center;justify-content:space-between;padding:18px 36px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;gap:16px;box-shadow:0 1px 2px rgba(15,23,42,.03)}
+        .logo{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600;white-space:nowrap;flex-shrink:0;color:var(--text)}
+        .ldot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent-glow)}
+        .acts{display:flex;align-items:center;gap:12px;flex-shrink:0}
+        .dtm{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;font-weight:500}
+        .ibtn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);transition:all .18s var(--ease)}
+        .ibtn:hover{border-color:var(--border-h);color:var(--accent);background:var(--card-h)}
+        .main{flex:1;overflow-y:auto;padding:32px 36px;background:var(--bg)}
+        .main::-webkit-scrollbar{width:5px}
+        .main::-webkit-scrollbar-thumb{background:var(--faint);border-radius:3px}
+        .greet{margin-bottom:28px}
+        .greet h1{font-size:26px;font-weight:400;margin-bottom:4px;color:var(--text)}
+        .greet p{font-size:13px;color:var(--muted);text-transform:capitalize}
+
+        .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px}
+        .card{aspect-ratio:1;border-radius:var(--r);border:1px solid var(--border);background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;cursor:pointer;position:relative;overflow:hidden;box-shadow:var(--shadow-sm);transition:background .2s,border-color .2s,transform .2s var(--ease),box-shadow .2s;-webkit-tap-highlight-color:transparent}
+        .card::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,var(--accent-dim) 0%,transparent 70%);opacity:0;transition:opacity .25s}
+        .card:hover{border-color:var(--border-h);background:var(--surface);transform:translateY(-3px);box-shadow:var(--shadow-md)}
+        .card:hover::after{opacity:1}
+        .aico{display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:12px;position:relative;z-index:1;transition:transform .2s,background .2s}
+        .aico svg{width:26px;height:26px;stroke-width:1.8}
+        .card:hover .aico{transform:scale(1.08)}
+        .anm{font-size:13px;font-weight:500;text-align:center;position:relative;z-index:1;color:var(--text)}
+        .adesc{font-size:11px;color:var(--muted);text-align:center;padding:0 8px}
+
+        /* OVERLAY */
+        #ov{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .3s var(--ease)}
+        #ov.on{opacity:1;pointer-events:all}
+        .ovh{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0}
+        .ovt{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:500;color:var(--text)}
+        .ovcl{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .18s var(--ease)}
+        .ovcl:hover{background:var(--card-h);color:var(--text);border-color:var(--border-h)}
+        #fr{flex:1;border:none;background:var(--bg)}
+
+        /* SETTINGS */
+        #sbd{position:fixed;inset:0;background:rgba(15,23,42,.3);backdrop-filter:blur(3px);z-index:599;opacity:0;pointer-events:none;transition:opacity .3s}
+        #sbd.on{opacity:1;pointer-events:all}
+        #sp{position:fixed;top:0;right:0;bottom:0;width:320px;background:var(--surface);border-left:1px solid var(--border);box-shadow:-4px 0 24px rgba(15,23,42,.08);z-index:600;padding:28px 26px;transform:translateX(100%);transition:transform .32s var(--ease);overflow-y:auto}
+        #sp.on{transform:translateX(0)}
+        .shd{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px}
+        .shd span{font-size:15px;font-weight:600;color:var(--text)}
+        .sg{margin-bottom:22px}
+        .sl{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:10px;font-weight:500}
+        .si2{width:100%;padding:10px 13px;border-radius:var(--rs);border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13.5px;outline:none;margin-bottom:8px;transition:border-color .18s,background .18s}
+        .si2:focus{border-color:var(--accent);background:var(--surface)}
+        .sb{width:100%;padding:11px;border-radius:var(--rs);border:none;background:var(--accent);color:#fff;font-family:inherit;font-size:13.5px;font-weight:500;cursor:pointer;box-shadow:0 2px 8px var(--accent-glow);transition:opacity .18s,transform .18s}
+        .sb:hover{opacity:.92;transform:translateY(-1px)}
+        .ssep{border:none;border-top:1px solid var(--border);margin:20px 0}
+        .sb.dng{background:transparent;border:1px solid var(--border);color:var(--muted);box-shadow:none}
+        .sb.dng:hover{border-color:#ef4444;color:#ef4444;background:rgba(239,68,68,.06)}
+
+        /* TOAST */
+        .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow-md);color:var(--text);border-radius:50px;padding:11px 22px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:opacity .28s,transform .28s var(--ease);pointer-events:none;white-space:nowrap}
+        .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+        @media(max-width:680px){
+            .hdr{padding:14px 18px}
+            .lname{display:none}
+            .main{padding:22px 18px}
+            #sp{width:100%}
+        }
+    </style>
+</head>
+<body>
+
+<!-- LOCK SCREEN -->
+<div id="lock">
+    <div class="lbg"></div>
+    <div class="lc">
+        <div>
+            <div class="lt" id="lt">00:00</div>
+            <div class="ld" id="ld">chargement...</div>
+        </div>
+        <div class="lsep"></div>
+        <div class="llbl">Code d'acces</div>
+        <div class="dots" id="dots"></div>
+        <div class="kp" id="kp"></div>
+    </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="db">
+    <header class="hdr">
+        <div class="logo">
+            <div class="ldot"></div>
+            <span class="lname">MySpace</span>
+        </div>
+        <div class="acts">
+            <span class="dtm" id="dtm">00:00</span>
+            <button class="ibtn" id="bset" title="Parametres">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            </button>
+        </div>
+    </header>
+    <main class="main">
+        <div class="greet">
+            <h1 id="gt">Bonjour</h1>
+            <p id="gs"></p>
+        </div>
+        <div class="grid" id="grid">
+            <div class="card" id="card-budget">
+                <div class="aico" style="color:#0f67d1;background:rgba(15,103,209,.08)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7V5a2 2 0 0 0-2-2H6a3 3 0 0 0-3 3v12a2 2 0 0 0 2 2h15V7H6a1 1 0 0 1 0-2"/><path d="M20 11h-5v5h5M16.5 13.5h.1"/></svg>
+                </div>
+                <div class="anm">Grand Livre</div>
+                <div class="adesc">Budget & Dépenses</div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- APP OVERLAY -->
+<div id="ov">
+    <div class="ovh">
+        <div class="ovt">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f67d1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7V5a2 2 0 0 0-2-2H6a3 3 0 0 0-3 3v12a2 2 0 0 0 2 2h15V7H6a1 1 0 0 1 0-2"/><path d="M20 11h-5v5h5M16.5 13.5h.1"/></svg>
+            <span>Grand Livre · Budget & Dépenses</span>
+        </div>
+        <div style="display:flex;gap:8px">
+            <a href="apps/budget/index.html" target="_blank" class="ovcl" title="Ouvrir dans un nouvel onglet" style="text-decoration:none">↗</a>
+            <button class="ovcl" id="bcl" title="Fermer">✕</button>
+        </div>
+    </div>
+    <iframe id="fr" src="" allow="fullscreen"></iframe>
+</div>
+
+<!-- SETTINGS -->
+<div id="sbd"></div>
+<div id="sp">
+    <div class="shd"><span>Parametres</span>
+        <button class="ibtn" id="bsc">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+    </div>
+    <div class="sg">
+        <div class="sl">Nom affiche</div>
+        <input id="sn" class="si2" type="text" placeholder="Mon espace...">
+        <button class="sb" id="bsn">Enregistrer le nom</button>
+    </div>
+    <hr class="ssep">
+    <div class="sg">
+        <div class="sl">Changer le PIN</div>
+        <input id="pc" class="si2" type="password" placeholder="Code actuel" maxlength="8">
+        <input id="pn" class="si2" type="password" placeholder="Nouveau code (4-8 chiffres)" maxlength="8">
+        <input id="pf" class="si2" type="password" placeholder="Confirmer" maxlength="8">
+        <button class="sb" id="bsp">Mettre a jour le PIN</button>
+    </div>
+    <hr class="ssep">
+    <button class="sb dng" id="bdelall" style="margin-bottom:10px;border-color:rgba(239,68,68,.3);color:#ef4444">Effacer toutes les donnees</button>
+    <button class="sb dng" id="blk">Verrouiller la session</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+const RANDOM_GREETINGS = [
+    "Prêt pour une nouvelle session productive ?",
+    "Chaque petit pas mène à de grands accomplissements.",
+    "Que souhaitez-vous explorer aujourd'hui ?",
+    "Concentration maximale, esprit serein.",
+    "Votre espace de travail est prêt.",
+    "L'efficacité commence par de bons outils.",
+    "Prenez une grande inspiration et créez l'extraordinaire.",
+    "Bienvenue dans votre centre de contrôle."
+];
+
+let currentRandomGreeting = RANDOM_GREETINGS[Math.floor(Math.random() * RANDOM_GREETINGS.length)];
+
+function refreshGreetingText() {
+    currentRandomGreeting = RANDOM_GREETINGS[Math.floor(Math.random() * RANDOM_GREETINGS.length)];
+    tick();
+}
+
+const S={
+    pin: localStorage.getItem('ms_pin')||'1234',
+    name:localStorage.getItem('ms_name')||'MySpace',
+    ent:'',locked:true
+};
+const q=id=>document.getElementById(id);
+const lock=q('lock'),db=q('db');
+const lt=q('lt'),ld=q('ld'),dtm=q('dtm'),gt=q('gt'),gs=q('gs');
+const sp=q('sp'),sbd=q('sbd'),toast=q('toast');
+
+function tick(){
+    const n=new Date();
+    const t=n.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    const d=n.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+    lt.textContent=dtm.textContent=t;
+    ld.textContent=d;
+    gt.textContent = currentRandomGreeting;
+    const formattedDate = d.charAt(0).toUpperCase() + d.slice(1);
+    gs.textContent = `${formattedDate} • ${S.name}`;
+}
+setInterval(tick,1000);tick();
+
+function bldDots(){
+    const c=q('dots'); c.innerHTML='';
+    for(let i=0;i<S.pin.length;i++){
+        const d=document.createElement('div');
+        d.className='dot'+(i<S.ent.length?' on':'');
+        c.appendChild(d);
+    }
+}
+function bldKp(){
+    const kp=q('kp'); kp.innerHTML='';
+    [1,2,3,4,5,6,7,8,9,'',0,'del'].forEach(k=>{
+        const b=document.createElement('button');
+        if(k===''){b.className='k empty';}
+        else if(k==='del'){
+            b.className='k del';
+            b.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg>';
+            b.onclick=()=>dg('del');
+        }else{
+            b.className='k'; b.textContent=k; b.onclick=()=>dg(String(k));
+        }
+        kp.appendChild(b);
+    });
+}
+function dg(v){
+    if(v==='del') S.ent=S.ent.slice(0,-1);
+    else if(S.ent.length<S.pin.length) S.ent+=v;
+    bldDots();
+    if(S.ent.length===S.pin.length) setTimeout(chk,120);
+}
+function chk(){
+    if(S.ent===S.pin){
+        S.locked=false;
+        S.ent='';
+        refreshGreetingText();
+        lock.classList.add('hidden');
+        db.classList.add('on');
+    }
+    else{
+        q('dots').querySelectorAll('.dot').forEach(d=>d.classList.add('err'));
+        setTimeout(()=>{S.ent='';bldDots();},650);
+    }
+}
+function doLock(){
+    S.locked=true;S.ent='';bldDots();
+    lock.classList.remove('hidden');db.classList.remove('on');
+    closeSet();
+}
+document.addEventListener('keydown',e=>{
+    if(S.locked){
+        if(e.key>='0'&&e.key<='9') dg(e.key);
+        if(e.key==='Backspace') dg('del');
+        return;
+    }
+    if(e.key==='Escape'){
+        if(ov.classList.contains('on')){ closeApp(); return; }
+        closeSet();
+    }
+});
+
+function openSet(){q('sn').value=S.name;sp.classList.add('on');sbd.classList.add('on');}
+function closeSet(){sp.classList.remove('on');sbd.classList.remove('on');}
+q('bset').onclick=openSet;q('bsc').onclick=closeSet;sbd.onclick=closeSet;
+q('blk').onclick=doLock;
+q('bdelall').onclick=()=>{
+    if(confirm("Attention : Voulez-vous vraiment effacer toutes les donnees du Grand Livre et reinitialiser l'application ?\n\nCette action est irreversible.")){
+        localStorage.clear();
+        location.reload();
+    }
+};
+
+q('bsn').onclick=()=>{
+    const v=q('sn').value.trim();
+    if(!v)return showToast('Entrez un nom valide');
+    S.name=v;localStorage.setItem('ms_name',v);showToast('Nom mis a jour');
+};
+q('bsp').onclick=()=>{
+    const c=q('pc').value,n=q('pn').value,f=q('pf').value;
+    if(c!==S.pin)return showToast('Code actuel incorrect');
+    if(!/^\d{4,8}$/.test(n))return showToast('4 a 8 chiffres requis');
+    if(n!==f)return showToast('Les codes ne correspondent pas');
+    S.pin=n;localStorage.setItem('ms_pin',n);
+    [q('pc'),q('pn'),q('pf')].forEach(el=>el.value='');
+    bldDots();showToast('PIN mis a jour avec succes');
+};
+
+let _tm;
+function showToast(msg){
+    clearTimeout(_tm);toast.textContent=msg;toast.classList.add('on');
+    _tm=setTimeout(()=>toast.classList.remove('on'),3200);
+}
+
+const ov=q('ov'),fr=q('fr');
+
+function launchApp(url) {
+    fr.src = url;
+    ov.classList.add('on');
+}
+
+function closeApp() {
+    ov.classList.remove('on');
+    setTimeout(() => { fr.src = ''; }, 250);
+}
+
+const cardBudget = q('card-budget');
+if (cardBudget) {
+    cardBudget.onclick = () => launchApp('apps/budget/index.html?v=' + Date.now());
+}
+
+const bcl = q('bcl');
+if (bcl) {
+    bcl.onclick = closeApp;
+}
+
+bldDots();bldKp();
+</script>
+</body>
+</html>
